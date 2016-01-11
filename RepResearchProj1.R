@@ -1,41 +1,27 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
 ## Coursera - Reproducible Research, Project 1
-Instructions:
+##
+## 1.) Code for reading in the dataset and/or processing the data
+## 2.) Histogram of the total number of steps taken each day
+## 3.) Mean and median number of steps taken each day
+## 4.) Time series plot of the average number of steps taken
+## 5.) The 5-minute interval that, on average, contains the maximum number of steps
+## 6.) Code to describe and show a strategy for imputing missing data
+## 7.) Histogram of the total number of steps taken each day after missing values are imputed
+## 8.) Panel plot comparing the average number of steps taken per 5-minute interval 
+## across weekdays and weekends
+## 9.) All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
 
-1. Code for reading in the dataset and/or processing the data
-2. Histogram of the total number of steps taken each day
-3. Mean and median number of steps taken each day
-4. Time series plot of the average number of steps taken
-5. The 5-minute interval that, on average, contains the maximum number of steps
-6. Code to describe and show a strategy for imputing missing data
-7. Histogram of the total number of steps taken each day after missing values are imputed
-8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
-9. All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
-
-
-## Loading and preprocessing the data
-The data is contained in the activity.zip file in the course repo, but has been 
-cloned and unzipped on my local computer.  It was then read into memory using the 
-read.csv function
-
-```{r, echo=TRUE}
+library(dplyr)
 library(lattice)
+library(knitr)
 setwd("~/rprogramming/ReprodResearch/RepData_PeerAssessment1")
+
+## 1.) Code for reading in the dataset and/or processing the data
 ## unzip and read in the the activity file
 unzip("activity.zip")
 activity <- read.csv("activity.csv")
-```
 
-## What is mean total number of steps taken per day?
-The sum of steps for each day were calculated using the aggregate function, ignoring NA values.  
-A histogram of the data was plotted, with mean and median values indicated 
-
-```{r, echo=TRUE}
+## 2.) Histogram of the total number of steps taken each day
 ## Sum the total number of steps for each date
 stepsPerDay <- aggregate(activity$steps, by=list(activity$date), "sum", na.rm = TRUE)
 colnames(stepsPerDay) <- c("date", "steps")
@@ -44,6 +30,7 @@ colnames(stepsPerDay) <- c("date", "steps")
 par(mar=c(5.1,4.1,4.1,2.1))
 with(stepsPerDay, hist(steps, main = "Histogram of Steps Taken Each Day"))
 
+## 3.) Mean and median number of steps taken each day
 ## Calculate mean and median steps per day and add to the current histogram plot
 meanSteps <- mean(stepsPerDay$steps, na.rm = TRUE)
 abline(v = meanSteps, col = "green", lwd = 2)
@@ -54,15 +41,8 @@ abline(v = medianSteps, col = "blue", lwd = 2, lty = 2)
 legend(2000,25, c(paste("Mean=",round(meanSteps,1)), 
                   paste("Median=",round(medianSteps,1))), 
                   fill=c("green", "blue"), bty = "n", cex=0.8)
-```
 
-
-## What is the average daily activity pattern?
-To show the average activity pattern, the steps for each 5-minute interval were
-averaged across all the dates.  The average steps were plotted for each interval.
-The maximum average number of steps is 206.2 and is in interval 835.
-
-```{r, echo=TRUE}
+## 4.) Time series plot of the average number of steps taken
 ## Calculate mean of steps taken for each interval, averaged across all dates
 stepsPerInterval <- aggregate(activity$steps, by=list(activity$interval), 
                               "mean", na.rm = TRUE)
@@ -76,7 +56,6 @@ with(stepsPerInterval, plot(interval,steps, type = "l",
 
 ## Calculate the index value for average max # of steps
 maxSteps <- which.max(stepsPerInterval$steps)
-## Add a point indicating the max average step value
 points(stepsPerInterval$interval[maxSteps],stepsPerInterval$steps[maxSteps], 
        pch=19, col = "blue")
 legend("topright", paste("Max avg. # steps = ", 
@@ -84,21 +63,8 @@ legend("topright", paste("Max avg. # steps = ",
                          "in interval 835"),
        pch = 19,col ="blue", 
        bty = "n", cex = 0.8)
-```
 
-
-
-## Imputing missing values
-In this data set, replacing the NA values could be done several ways.
-
-Two possible approaches were attempted:
-
-* replacing NA values with the mean for the interval, averaged across all days
-* replacing NA values with the mean for the day, averaged across all intervals
-
-The second approach was used because generally when NA values were found, all interval step values for the entire days were generally = NA. The resulting histogram plot, mean and media look identical to the earlier plotting exercise
-
-```{r, echo=TRUE}
+## 6.) Code to describe and show a strategy for imputing missing data
 ## First calculate the number of missing values for steps
 ## 2304 missing values out of 17568 observations
 missingData = sum(is.na(activity$steps))  
@@ -125,8 +91,9 @@ for(i in 1:nrow(activityImp)) {
         }
 }
 
-## As in the earlier histogram plot, the total number of steps for each day is
-## calculated from the imputed dataset, and the mean and median is shown.
+## 7.) Histogram of the total number of steps taken each day after missing values are imputed
+## As in steps 2 and 3, plot a histogram of the total number of steps taken each day
+## from the imputed data and plot the mean and median
 stepsPerDayImp <- aggregate(activityImp$steps, by=list(activity$date), "sum", na.rm = TRUE)
 colnames(stepsPerDayImp) <- c("date", "steps")
 with(stepsPerDayImp, hist(steps, main = "Steps Taken Each Day - Imputed"))
@@ -137,18 +104,13 @@ abline(v = median(stepsPerDayImp$steps, na.rm = TRUE), col = "blue", lwd = 2, lt
 legend(2000,25, c(paste("Mean=",round(mean(stepsPerDayImp$steps, na.rm = TRUE),1)), 
                   paste("Median=",round(median(stepsPerDayImp$steps, na.rm = TRUE),1))), 
        fill=c("green", "blue"), bty = "n", cex=0.8)
-```
 
+## When missing values are imputed in this manner, the histogram plot and the mean and
+## median values are identical to the histogram plots for questions 2.) and 3.)
 
-## Are there differences in activity patterns between weekdays and weekends?
-To track activity differences between weekdays and weekends, the imputed data
-was used, identifying which data was from the "weekend" (Saturday and Sunday),
-and which data was from a "weekday" (Monday through Friday).
-To visually see the difference, line plots were made with the steps
-taken for each 5-minute time interval and averaged across weekdays and weekends.
-The plots show differences, notably with weekdays showing a larger spike 
+## 8.) Panel plot comparing the average number of steps taken per 5-minute interval 
+## across weekdays and weekends
 
-```{r, echo=TRUE}
 ## Add variable to compute day of the week
 activityImp$day <- weekdays(as.POSIXlt(activityImp$date))
 ## Add variable indicating "weekday" or "weekend"
@@ -163,10 +125,18 @@ for(i in 1:nrow(activityImp)) {
 stepsPerInt <- with(activityImp, aggregate(steps, by=list(interval,wkday), 
                                            "mean", na.rm = TRUE))
 colnames(stepsPerInt) <- c("interval", "wkday", "steps")
-## Panel plot of the data across weekdays and weekends
+
 with(stepsPerInt, xyplot(steps~interval|wkday, type = "l", layout=c(1,2),
                          main="Average steps taken for each time interval",
                          xlab="5 minute time intervals"))
-```
+
+
+
+
+
+
+
+
+
 
 

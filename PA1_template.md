@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 ## Coursera - Reproducible Research, Project 1
 Instructions:
 
@@ -23,7 +18,8 @@ The data is contained in the activity.zip file in the course repo, but has been
 cloned and unzipped on my local computer.  It was then read into memory using the 
 read.csv function
 
-```{r, echo=TRUE}
+
+```r
 library(lattice)
 setwd("~/rprogramming/ReprodResearch/RepData_PeerAssessment1")
 ## unzip and read in the the activity file
@@ -35,7 +31,8 @@ activity <- read.csv("activity.csv")
 The sum of steps for each day were calculated using the aggregate function, ignoring NA values.  
 A histogram of the data was plotted, with mean and median values indicated 
 
-```{r, echo=TRUE}
+
+```r
 ## Sum the total number of steps for each date
 stepsPerDay <- aggregate(activity$steps, by=list(activity$date), "sum", na.rm = TRUE)
 colnames(stepsPerDay) <- c("date", "steps")
@@ -56,13 +53,16 @@ legend(2000,25, c(paste("Mean=",round(meanSteps,1)),
                   fill=c("green", "blue"), bty = "n", cex=0.8)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)\
+
 
 ## What is the average daily activity pattern?
 To show the average activity pattern, the steps for each 5-minute interval were
 averaged across all the dates.  The average steps were plotted for each interval.
 The maximum average number of steps is 206.2 and is in interval 835.
 
-```{r, echo=TRUE}
+
+```r
 ## Calculate mean of steps taken for each interval, averaged across all dates
 stepsPerInterval <- aggregate(activity$steps, by=list(activity$interval), 
                               "mean", na.rm = TRUE)
@@ -86,6 +86,8 @@ legend("topright", paste("Max avg. # steps = ",
        bty = "n", cex = 0.8)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)\
+
 
 
 ## Imputing missing values
@@ -98,7 +100,8 @@ Two possible approaches were attempted:
 
 The second approach was used because generally when NA values were found, all interval step values for the entire days were generally = NA. The resulting histogram plot, mean and media look identical to the earlier plotting exercise
 
-```{r, echo=TRUE}
+
+```r
 ## First calculate the number of missing values for steps
 ## 2304 missing values out of 17568 observations
 missingData = sum(is.na(activity$steps))  
@@ -139,6 +142,8 @@ legend(2000,25, c(paste("Mean=",round(mean(stepsPerDayImp$steps, na.rm = TRUE),1
        fill=c("green", "blue"), bty = "n", cex=0.8)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)\
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 To track activity differences between weekdays and weekends, the imputed data
@@ -148,7 +153,8 @@ To visually see the difference, line plots were made with the steps
 taken for each 5-minute time interval and averaged across weekdays and weekends.
 The plots show differences, notably with weekdays showing a larger spike 
 
-```{r, echo=TRUE}
+
+```r
 ## Add variable to compute day of the week
 activityImp$day <- weekdays(as.POSIXlt(activityImp$date))
 ## Add variable indicating "weekday" or "weekend"
@@ -168,5 +174,7 @@ with(stepsPerInt, xyplot(steps~interval|wkday, type = "l", layout=c(1,2),
                          main="Average steps taken for each time interval",
                          xlab="5 minute time intervals"))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)\
 
 
